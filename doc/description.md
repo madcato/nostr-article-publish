@@ -16,9 +16,10 @@ The `.content` of these events should be a string text in Markdown syntax.
 - [x] Load parameters from command line.
 - [x] Load sec key from environment. Check if exists, show error: "To launch this command, first define the enviroment variable NOSTR_SEC_KEY with the signing key".
 - [x] Read relays from a TOML file.
-- [ ] Check if the content has forced hard line-breaks. Show an error: "MUST NOT hard line-break paragraphs of text, such as arbitrary line breaks at 80 column boundaries.".
-- [ ] Check if content has HTML tags. Show an error: "MUST NOT support adding HTML to Markdown."
-- [ ] Read from command arguments this fields, all optional: _title_, _image_, _summary_, and _published_at_.
+- [x] Check if the content has forced hard line-breaks. Show an error: "MUST NOT hard line-break paragraphs of text, such as arbitrary line breaks at 80 column boundaries.".
+- [x] Check if content has HTML tags. Show an error: "MUST NOT support adding HTML to Markdown."
+- [x] Read from command arguments this fields, all optional: _title_, _image_, _summary_, and _published_at_.
+- [ ] Read config file from arguments.
 - [ ] Analyze what `d` identifier is.
 - [ ] Check every relay if allows `d`. Do not publish to that relay. Show error: "This relay does not allow to edit the content".
 - [ ] Analyze [bip-19](https://github.com/nostr-protocol/nips/blob/master/19.md).
