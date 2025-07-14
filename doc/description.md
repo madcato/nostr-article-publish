@@ -13,8 +13,8 @@ The `.content` of these events should be a string text in Markdown syntax.
 - [nips-23: Long-form Content](https://github.com/nostr-protocol/nips/blob/master/23.md)
 
 ## ToDo
-- [ ] Load parameters from command line.
-- [ ] Load sec key from environment. Check if exists, show error: "To launch this command, first define the enviroment variable NOSTR_SEC_KEY with the signing key.
+- [x] Load parameters from command line.
+- [x] Load sec key from environment. Check if exists, show error: "To launch this command, first define the enviroment variable NOSTR_SEC_KEY with the signing key".
 - [ ] Read relays from a YAML file.
 - [ ] Check if the content has forced hard line-breaks. Show an error: "MUST NOT hard line-break paragraphs of text, such as arbitrary line breaks at 80 column boundaries.".
 - [ ] Check if content has HTML tags. Show an error: "MUST NOT support adding HTML to Markdown."

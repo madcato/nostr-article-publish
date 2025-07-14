@@ -1,4 +1,5 @@
 use std::env;
+use anyhow::{Context, Result};
 use clap::Parser;
 use nostr_sdk::prelude::*;
 
@@ -35,13 +36,12 @@ enum Commands {
     }
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    let args = Args::parse();
-
+async fn entry_point() -> Result<()> {
     // Load nosrt sec key to sign the message
-    let bech32_sec_key = env::var("NOSTR_SEC_KEY")?;
+    let bech32_sec_key = env::var("NOSTR_SEC_KEY").with_context(|| format!("To launch this command, define the enviroment variable NOSTR_SEC_KEY with the signing key"))?;
     let keys = Keys::parse(&bech32_sec_key)?;
+
+    let args = Args::parse();
 
     // Show bech32 public key
     let bech32_pubkey: String = keys.public_key().to_bech32()?;
@@ -75,4 +75,9 @@ async fn main() -> Result<()> {
     client.send_event_builder(builder).await?;
 
     Ok(())
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    return entry_point().await;
 }
