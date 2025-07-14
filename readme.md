@@ -1,5 +1,6 @@
 # Publish long form text note on nostr
 
+Read the [Project description](doc/description.md)
 - [nips-23: Long-form Content](https://github.com/nostr-protocol/nips/blob/master/23.md)
 
 ### Metadata fields
