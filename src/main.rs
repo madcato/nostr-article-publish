@@ -1,5 +1,8 @@
 use std::env;
 use anyhow::{Context, Result};
+use serde::{Serialize, Deserialize};
+use std::fs;
+use toml;
 use clap::Parser;
 use nostr_sdk::prelude::*;
 
@@ -36,10 +39,20 @@ enum Commands {
     }
 }
 
-async fn entry_point() -> Result<()> {
-    // Load nosrt sec key to sign the message
+#[derive(Serialize, Deserialize, Debug)]
+struct Relays {
+    relays: Vec<String>
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Load nostr sec key to sign the message
     let bech32_sec_key = env::var("NOSTR_SEC_KEY").with_context(|| format!("To launch this command, define the enviroment variable NOSTR_SEC_KEY with the signing key"))?;
     let keys = Keys::parse(&bech32_sec_key)?;
+
+    // Load relays from relays.toml
+    let relays_str = fs::read_to_string("relays.toml").with_context(|| "Configuration file 'relays.toml' could not be read.")?;
+    let relays: Relays = toml::from_str(&relays_str).with_context(|| "Error deserializing 'relays.toml'.")?;
 
     let args = Args::parse();
 
@@ -51,7 +64,9 @@ async fn entry_point() -> Result<()> {
     let client = Client::builder().signer(keys.clone()).build();
     
     // Add relays
-    client.add_relay("ws://micro-atx:18080").await?;
+    for relay in relays.relays {
+        client.add_relay(relay).await?;
+    }
     
     // Connect to relays
     client.connect().await;
@@ -75,9 +90,4 @@ async fn entry_point() -> Result<()> {
     client.send_event_builder(builder).await?;
 
     Ok(())
-}
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    return entry_point().await;
 }

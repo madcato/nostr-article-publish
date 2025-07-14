@@ -1,0 +1,3 @@
+relays = [
+    "ws://micro-atx:18080"
+]

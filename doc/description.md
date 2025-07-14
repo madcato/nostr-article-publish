@@ -15,7 +15,7 @@ The `.content` of these events should be a string text in Markdown syntax.
 ## ToDo
 - [x] Load parameters from command line.
 - [x] Load sec key from environment. Check if exists, show error: "To launch this command, first define the enviroment variable NOSTR_SEC_KEY with the signing key".
-- [ ] Read relays from a YAML file.
+- [x] Read relays from a TOML file.
 - [ ] Check if the content has forced hard line-breaks. Show an error: "MUST NOT hard line-break paragraphs of text, such as arbitrary line breaks at 80 column boundaries.".
 - [ ] Check if content has HTML tags. Show an error: "MUST NOT support adding HTML to Markdown."
 - [ ] Read from command arguments this fields, all optional: _title_, _image_, _summary_, and _published_at_.
