@@ -19,12 +19,11 @@ The `.content` of these events should be a string text in Markdown syntax.
 - [x] Check if the content has forced hard line-breaks. Show an error: "MUST NOT hard line-break paragraphs of text, such as arbitrary line breaks at 80 column boundaries.".
 - [x] Check if content has HTML tags. Show an error: "MUST NOT support adding HTML to Markdown."
 - [x] Read from command arguments this fields, all optional: _title_, _image_, _summary_, and _published_at_.
-- [ ] Read config file from arguments.
+- [x] Read config file from arguments.
+- [x] Create and show identifier of the created event.
 - [ ] Analyze what `d` identifier is.
 - [ ] Check every relay if allows `d`. Do not publish to that relay. Show error: "This relay does not allow to edit the content".
 - [ ] Analyze [bip-19](https://github.com/nostr-protocol/nips/blob/master/19.md).
-- [ ] Show identifier of the created event.
-- [ ] Impliment **modify** command.
 - [ ] Implement **delete** command.
 - [ ] Document in readme.md how to use this project.
 
