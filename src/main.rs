@@ -102,8 +102,11 @@ async fn publish_article(file_name: String, article_identifier: String, title: O
 async fn delete_article(article_identifier: String, client: Client, public_key: PublicKey) -> Result<()> {
     let coordinate = Coordinate { kind: Kind::LongFormTextNote, public_key: public_key, identifier: article_identifier };
     let request = EventDeletionRequest::new().coordinate(coordinate);
-    let builder = EventBuilder::delete(request);
+    let k_tag = Tag::from_standardized(TagStandard::Kind { kind: Kind::LongFormTextNote  , uppercase: false });
+    let builder = EventBuilder::delete(request).tag(k_tag);
     client.send_event_builder(builder).await?;
+    // let event: Event = client.sign_event_builder(builder).await?;
+    // println!("{:?}",event.tags);
     Ok(())
 }
 
