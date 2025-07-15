@@ -1,5 +1,5 @@
 relays = [
-    "ws://micro-atx:18080",
+    # "ws://micro-atx:18080",
     "wss://nos.lol",
     "wss://relay.damus.io",
     "wss://nostr.wine"
