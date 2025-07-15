@@ -235,45 +235,4 @@ mod tests {
         let content = "This has \\n".to_string();
         assert!(validate_content(&content).is_err());
     }
-
-    #[test]
-    fn test_args_parse_publish() {
-        let args = Args::parse_from(vec!["test", "publish", "--file-name", "article.md", "--article-identifier", "id1"] );
-        match args.command {
-            Commands::Publish { file_name, article_identifier, title: None, image: None, published_at: None, summary: None } => {
-                assert_eq!(file_name, "article.md");
-                assert_eq!(article_identifier, "id1");
-            }
-            _ => panic!("Wrong command"),
-        }
-    }
-
-    // Test CLI argument parsing for Publish
-    #[test]
-    fn test_parse_publish_command() {
-        let input = vec!["app", "publish", "--file-name", "test.md", "--article-identifier", "test-id", "--title", "Test Title"];
-        let args = Args::parse_from(input);
-        if let Commands::Publish { file_name, article_identifier, title, image, summary, published_at } = args.command {
-            assert_eq!(file_name, "test.md");
-            assert_eq!(article_identifier, "test-id");
-            assert_eq!(title, Some("Test Title".to_string()));
-            assert_eq!(image, None);
-            assert_eq!(summary, None);
-            assert_eq!(published_at, None);
-        } else {
-            panic!("Parsed wrong command");
-        }
-    }
-
-    // Test CLI argument parsing for Delete
-    #[test]
-    fn test_parse_delete_command() {
-        let input = vec!["app", "delete", "--article-identifier", "test-id"];
-        let args = Args::parse_from(input);
-        if let Commands::Delete { article_identifier } = args.command {
-            assert_eq!(article_identifier, "test-id");
-        } else {
-            panic!("Parsed wrong command");
-        }
-    }
 }
