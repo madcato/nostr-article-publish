@@ -21,9 +21,10 @@ The `.content` of these events should be a string text in Markdown syntax.
 - [x] Read from command arguments this fields, all optional: _title_, _image_, _summary_, and _published_at_.
 - [x] Read config file from arguments.
 - [x] Create and show identifier of the created event.
+- [x] Ask user for an article identifier, mandatory.
+- [ ] Implement **delete** command.
 - [ ] Analyze what `d` identifier is.
 - [ ] Check every relay if allows `d`. Do not publish to that relay. Show error: "This relay does not allow to edit the content".
 - [ ] Analyze [bip-19](https://github.com/nostr-protocol/nips/blob/master/19.md).
-- [ ] Implement **delete** command.
 - [ ] Document in readme.md how to use this project.
 

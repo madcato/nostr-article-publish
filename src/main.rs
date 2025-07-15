@@ -26,6 +26,9 @@ enum Commands {
         /// File name of the content to publish.
         #[arg(short, long)]
         file_name: String,
+        /// Identifier of the article.
+        #[arg(short, long)]
+        article_identifier: String,
         /// Title of the article.
         #[arg(short, long)]
         title: Option<String>,
@@ -64,12 +67,12 @@ fn validate_content(content: &String) -> Result<()> {
 
     Ok(())
 }
-async fn publish_long_content_event(file_name: String, title: Option<String>, image: Option<Url>, summary: Option<String>, published_at: Option<u64>, client: Client) -> Result<()> {
+async fn publish_long_content_event(file_name: String, identifier: String, title: Option<String>, image: Option<Url>, summary: Option<String>, published_at: Option<u64>, client: Client) -> Result<()> {
     let content = fs::read_to_string(file_name).with_context(|| format!("Content file could not be read."))?;
     validate_content(&content)?;
     let dimensions = ImageDimensions::new(200, 200);
     let mut tags = Vec::from([
-        Tag::identifier("long-form-content-2".to_string()),
+        Tag::identifier(identifier),
     ]);
 
     if let Some(title) = title {
@@ -124,7 +127,7 @@ async fn main() -> Result<()> {
     client.connect().await;
 
     match args.command {
-        Commands::Publish { file_name, title, image, summary, published_at } => { publish_long_content_event(file_name, title, image, summary, published_at, client).await? },
+        Commands::Publish { file_name, article_identifier, title, image, summary, published_at } => { publish_long_content_event(file_name, article_identifier, title, image, summary, published_at, client).await? },
         Commands::Delete { identifier } => {}
     }
 
