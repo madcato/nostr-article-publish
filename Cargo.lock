@@ -863,7 +863,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "nostr-publish-md"
+name = "nostr-publish"
 version = "0.1.0"
 dependencies = [
  "anyhow",

@@ -1,19 +1,6 @@
-# Nostr Long-Form Content Publisher
+# Nostr Article Publisher
 
-## Execute
-
-```sh
-cargo run publish -f fixtures/post.md -a test-article-01 -i "https://i.sstatic.net/jaiMD.jpg?s=256"
-```
-
-### To delete a previous publication
-```sh
-cargo run delete -a test-article-01
-```
-
-
-
-A command-line tool written in Rust for publishing and deleting long-form content events (NIP-23) on the Nostr protocol. It supports validation of content, custom tags for articles, and interaction with multiple relays configured via a TOML file.
+A command-line tool written in Rust for publishing and deleting long-form content events ([NIP-23](https://github.com/nostr-protocol/nips/blob/master/23.md)) on the Nostr protocol. It supports validation of content, custom tags for articles, and interaction with multiple relays configured via a TOML file.
 
 ## Features
 
@@ -33,7 +20,7 @@ A command-line tool written in Rust for publishing and deleting long-form conten
 1. Clone the repository:
    ```
    git clone <repository-url>
-   cd nostr-publish
+   cd nostr-article-publish
    ```
 
 2. Build the binary:
