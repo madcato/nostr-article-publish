@@ -44,7 +44,7 @@ enum Commands {
     },
     /// Delete an event from configured nostr relays.
     Delete {
-        /// Identifier of the event to delete.
+        /// Identifier of the event to delete. Must be the same used in the publish.
         #[arg(short, long)]
         article_identifier: String,
     }
@@ -67,12 +67,12 @@ fn validate_content(content: &String) -> Result<()> {
 
     Ok(())
 }
-async fn publish_article(file_name: String, identifier: String, title: Option<String>, image: Option<Url>, summary: Option<String>, published_at: Option<u64>, client: Client) -> Result<()> {
+async fn publish_article(file_name: String, article_identifier: String, title: Option<String>, image: Option<Url>, summary: Option<String>, published_at: Option<u64>, client: Client) -> Result<()> {
     let content = fs::read_to_string(file_name).with_context(|| format!("Content file could not be read."))?;
     validate_content(&content)?;
-    let dimensions = ImageDimensions::new(200, 200);
+    
     let mut tags = Vec::from([
-        Tag::identifier(identifier),
+        Tag::identifier(article_identifier),
     ]);
 
     if let Some(title) = title {
@@ -84,6 +84,7 @@ async fn publish_article(file_name: String, identifier: String, title: Option<St
     }
 
     if let Some(image) = image {
+        let dimensions = ImageDimensions::new(200, 200);
         tags.push(Tag::image(image, Some(dimensions)));
     }
 
@@ -98,9 +99,9 @@ async fn publish_article(file_name: String, identifier: String, title: Option<St
     Ok(())
 }
 
-async fn delete_article(identifier: String, client: Client) -> Result<()> {
-    let event_id = EventId::parse(&identifier).with_context(|| format!("Invalid article identifier format."))?;
-    let request = EventDeletionRequest::new().id(event_id);
+async fn delete_article(article_identifier: String, client: Client, public_key: PublicKey) -> Result<()> {
+    let coordinate = Coordinate { kind: Kind::LongFormTextNote, public_key: public_key, identifier: article_identifier };
+    let request = EventDeletionRequest::new().coordinate(coordinate);
     let builder = EventBuilder::delete(request);
     client.send_event_builder(builder).await?;
     Ok(())
@@ -137,7 +138,7 @@ async fn main() -> Result<()> {
 
     match args.command {
         Commands::Publish { file_name, article_identifier, title, image, summary, published_at } => { publish_article(file_name, article_identifier, title, image, summary, published_at, client).await? },
-        Commands::Delete { article_identifier } => { delete_article(article_identifier, client).await? }
+        Commands::Delete { article_identifier } => { delete_article(article_identifier, client, keys.public_key()).await? }
     }
 
     Ok(())
