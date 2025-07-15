@@ -46,7 +46,7 @@ enum Commands {
     Delete {
         /// Identifier of the event to delete.
         #[arg(short, long)]
-        identifier: String,
+        article_identifier: String,
     }
 }
 
@@ -67,7 +67,7 @@ fn validate_content(content: &String) -> Result<()> {
 
     Ok(())
 }
-async fn publish_long_content_event(file_name: String, identifier: String, title: Option<String>, image: Option<Url>, summary: Option<String>, published_at: Option<u64>, client: Client) -> Result<()> {
+async fn publish_article(file_name: String, identifier: String, title: Option<String>, image: Option<Url>, summary: Option<String>, published_at: Option<u64>, client: Client) -> Result<()> {
     let content = fs::read_to_string(file_name).with_context(|| format!("Content file could not be read."))?;
     validate_content(&content)?;
     let dimensions = ImageDimensions::new(200, 200);
@@ -97,6 +97,15 @@ async fn publish_long_content_event(file_name: String, identifier: String, title
 
     Ok(())
 }
+
+async fn delete_article(identifier: String, client: Client) -> Result<()> {
+    let event_id = EventId::parse(&identifier).with_context(|| format!("Invalid article identifier format."))?;
+    let request = EventDeletionRequest::new().id(event_id);
+    let builder = EventBuilder::delete(request);
+    client.send_event_builder(builder).await?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
@@ -127,8 +136,8 @@ async fn main() -> Result<()> {
     client.connect().await;
 
     match args.command {
-        Commands::Publish { file_name, article_identifier, title, image, summary, published_at } => { publish_long_content_event(file_name, article_identifier, title, image, summary, published_at, client).await? },
-        Commands::Delete { identifier } => {}
+        Commands::Publish { file_name, article_identifier, title, image, summary, published_at } => { publish_article(file_name, article_identifier, title, image, summary, published_at, client).await? },
+        Commands::Delete { article_identifier } => { delete_article(article_identifier, client).await? }
     }
 
     Ok(())
