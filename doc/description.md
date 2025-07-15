@@ -32,6 +32,6 @@ The `.content` of these events should be a string text in Markdown syntax.
 - [x] Adapt delete command to use addresable events, `d` tag.
 - [x] ~~Check every relay if allows `d`. Do not publish to that relay. Show error: "This relay does not allow to edit the content".~~
 - [x] ~~Analyze [bip-19](https://github.com/nostr-protocol/nips/blob/master/19.md).~~
-- [ ] For deletion command: create a REQ so find the articles, and use `e` tag to remove all.
+- [x] For deletion command: create a REQ so find the articles, and use `e` tag to remove all.
 - [ ] Document in readme.md how to use this project.
 - [ ] Add first version Changelog
