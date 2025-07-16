@@ -1,5 +1,7 @@
 # Nostr Article Publisher
 
+[![Release](https://github.com/madcato/nostr-article-publish/actions/workflows/release.yml/badge.svg?branch=master)](https://github.com/madcato/nostr-article-publish/actions/workflows/release.yml)
+
 A command-line tool written in Rust for publishing and deleting long-form content events ([NIP-23](https://github.com/nostr-protocol/nips/blob/master/23.md)) on the Nostr protocol. It supports validation of content, custom tags for articles, and interaction with multiple relays configured via a TOML file.
 
 ## Features
