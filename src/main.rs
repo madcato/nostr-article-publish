@@ -50,6 +50,15 @@ enum Commands {
         /// Identifier of the event to delete. Must be the same used in the publish.
         #[arg(short, long)]
         article_identifier: String,
+    },
+    /// List all articles published by the sec key owner
+    List {
+        /// Timestamp in unix seconds (stringified) of the first time the article to list, this is not the "published_at" tag, but the event time.
+        #[arg(short, long)]
+        since_published: Option<u64>,
+        /// Timestamp in unix seconds (stringified) of the last time the article to list, this is not the "published_at" tag, but the event time.
+        #[arg(short, long)]
+        until_published: Option<u64>,
     }
 }
 
@@ -70,6 +79,7 @@ fn validate_content(content: &String) -> Result<()> {
 
     Ok(())
 }
+
 async fn publish_article(file_name: String, article_identifier: String, title: Option<String>, image: Option<Url>, summary: Option<String>, published_at: Option<u64>, client: Client, public_key: PublicKey) -> Result<()> {
     let content = fs::read_to_string(file_name).with_context(|| format!("Content file could not be read."))?;
     validate_content(&content)?;
@@ -177,6 +187,60 @@ async fn delete_article(article_identifier: String, client: Client, public_key: 
     Ok(())
 }
 
+async fn list_articles(since_published: Option<u64>, until_published: Option<u64>, client: Client, public_key: PublicKey) -> Result<()> {
+    let mut filter = Filter::new()
+                            .author(public_key)
+                            .kind(Kind::LongFormTextNote); // 30023
+    
+    if let Some(since_published) = since_published {
+        filter = filter.since(Timestamp::from_secs(since_published));
+    }
+
+    if let Some(until_published) = until_published {
+        filter = filter.until(Timestamp::from_secs(until_published));
+    }
+                        // .since(Timestamp::now());
+    let Output { val: sub_id_1, .. } = client.subscribe(filter, None).await?;
+
+    let mut eose_received = false;
+
+    let timeout_duration = Duration::from_secs(10);
+    let start = Instant::now();
+
+    let mut notifications = client.notifications();
+
+    loop {
+        if eose_received || start.elapsed() > timeout_duration {
+            break;
+        }
+
+        select! {
+            Ok(notification) = notifications.recv() => {
+                match notification {
+                    RelayPoolNotification::Event { relay_url, event, subscription_id: sid, .. } if sid == sub_id_1 => {
+                        println!("Article id: {:?} on relay: {}", event.tags, relay_url);
+                    }
+                    RelayPoolNotification::Message { message, .. } => {
+                        if let RelayMessage::EndOfStoredEvents(sid) = message {
+                            if sid.into_owned() == sub_id_1 {
+                                eose_received = true;
+                            }
+                        }
+                    }
+                    _ => {},
+                }
+            }
+            _ = tokio::time::sleep(timeout_duration - start.elapsed()) => {
+                break;
+            }
+        }
+    }
+
+    client.unsubscribe(&sub_id_1).await;
+
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
@@ -208,7 +272,8 @@ async fn main() -> Result<()> {
 
     match args.command {
         Commands::Publish { file_name, article_identifier, title, image, summary, published_at } => { publish_article(file_name, article_identifier, title, image, summary, published_at, client, keys.public_key()).await? },
-        Commands::Delete { article_identifier } => { delete_article(article_identifier, client, keys.public_key()).await? }
+        Commands::Delete { article_identifier } => { delete_article(article_identifier, client, keys.public_key()).await? },
+        Commands::List { since_published, until_published } => { list_articles(since_published, until_published, client, keys.public_key()).await? }
     }
 
     Ok(())
