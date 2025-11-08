@@ -1,0 +1,20 @@
+[profile.default]
+private_key = "nsec1..."  # or set --key in CLI
+relays = [
+    "ws://micro-atx:18080",
+    "wss://nos.lol",
+    "wss://relay.damus.io",
+    "wss://nostr.wine",
+    "wss://nostr.oxtr.dev",
+    "wss://relay.nostr.band",
+    "wss://purplepag.es"
+]
+
+[kind]
+article = 30023  # kind for long articles (NIP-23)
+draft = 30024    # optional: drafts
+
+[metadata]
+name = "My Blog on Nostr"
+about = "Published from Git"
+picture = "https://..."

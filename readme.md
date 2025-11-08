@@ -38,6 +38,20 @@ cargo install nostr-publish
 
 ## Configuration
 
+### Directory structure of the blog
+```text
+repo-git/
+├── articles/
+│   ├── my-article.md
+│   ├── other-post.md
+│   └── _deleted/
+│       └── removed.md
+├── nostr.toml          ← Global configuration
+└── .nostr/             ← Local metadata (cache, states)
+    ├── published.json  ← Published events registry
+    └── keys/           ← Keys (optional, encrypted)
+```
+
 ### Relays Configuration
 Create a `relays.toml` file in the working directory (or specify a custom path with `-c/--config`):
 ```toml
@@ -57,7 +71,13 @@ export NOSTR_SEC_KEY="nsec1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ## Usage
 
-Run the tool with subcommands `publish` or `delete`. Use `--help` for detailed options.
+```bash
+nostr-publish publish        # Publish pending changes
+nostr-publish status         # Show what is published in local directory
+nostr-publish delete <file>  # Mark as deleted and publish delete event
+nostr-publish sync           # Force complete resynchronization
+nostr-publish init           # Initialize current directory
+```
 
 ### General Flags
 - `-c, --config <FILE>`: Path to custom relays TOML file (default: `relays.toml`).
@@ -135,6 +155,33 @@ Not found events to delete.
 ### Using Custom Config
 ```
 ./target/release/nostr-publish publish -f article.md -a my-article-id -c custom-relays.toml
+```
+
+## Blog
+### Article header
+```markdown
+---
+title: My fisrt post
+date: 2025-04-01
+tags: [rust, nostr]
+summary: A short summary
+slug: my-first-post
+---
+
+# Content...
+```
+
+### Local state of posts
+File `.nostr/published.json`
+```json
+{
+  "my-articles.md": {
+    "event_id": "abc123...",
+    "published_at": "2025-04-01T12:00:00Z",
+    "kind": 30023,
+    "hash": "sha256:abc123..."  // content hash
+  }
+}
 ```
 
 ## Dependencies

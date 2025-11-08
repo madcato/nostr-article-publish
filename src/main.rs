@@ -24,6 +24,10 @@ struct Args {
 
 #[derive(Parser, Debug)]
 enum Commands {
+    /// Create base blog files structure.
+    Init,
+    /// Show what is published.
+    Status,
     /// Publish an new long-form content event on configured nostr relays.
     Publish {
         /// File name of the content to publish.
@@ -51,7 +55,9 @@ enum Commands {
         #[arg(short, long)]
         article_identifier: String,
     },
-    /// List all articles published by the sec key owner
+    /// Force complete resynchronization.
+    Sync,
+    /// List all articles published by the sec key owner.
     List {
         /// Timestamp in unix seconds (stringified) of the first time the article to list, this is not the "published_at" tag, but the event time.
         #[arg(short, long)]
@@ -101,7 +107,7 @@ async fn publish_article(file_name: String, article_identifier: String, title: O
         tags.push(Tag::image(image, Some(dimensions)));
     }
 
-    let timestamp = published_at.unwrap_or_else(|| Timestamp::now().as_u64());
+    let timestamp = published_at.unwrap_or_else(|| Timestamp::now().as_secs());
     tags.push(Tag::from_standardized(TagStandard::PublishedAt(Timestamp::from(timestamp))));
 
     let coordinate = Coordinate { kind: Kind::LongFormTextNote, public_key: public_key, identifier: article_identifier };
@@ -271,9 +277,12 @@ async fn main() -> Result<()> {
     client.connect().await;
 
     match args.command {
+        Commands::Init { } => { },  // TODO: Implement
+        Commands::Status { } => { },  // TODO: Implement
         Commands::Publish { file_name, article_identifier, title, image, summary, published_at } => { publish_article(file_name, article_identifier, title, image, summary, published_at, client, keys.public_key()).await? },
         Commands::Delete { article_identifier } => { delete_article(article_identifier, client, keys.public_key()).await? },
-        Commands::List { since_published, until_published } => { list_articles(since_published, until_published, client, keys.public_key()).await? }
+        Commands::List { since_published, until_published } => { list_articles(since_published, until_published, client, keys.public_key()).await? },
+        Commands::Sync { } => {}  // TODO: Implement
     }
 
     Ok(())
