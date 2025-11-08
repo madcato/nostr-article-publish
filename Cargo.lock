@@ -1138,6 +1138,7 @@ dependencies = [
  "pulldown-cmark",
  "regex",
  "serde",
+ "serde_json",
  "serde_yaml",
  "sha2",
  "tokio",
