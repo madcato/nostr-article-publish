@@ -1,6 +1,6 @@
 use crate::cli::Args;
 use crate::client::init_nostr_client;
-use crate::nostr_operations::{publish_article, delete_article, list_articles};
+use crate::nostr_operations::{publish_article, delete_article, list_articles, sync_articles};
 use anyhow::Result;
 use clap::Parser;
 use nostr_sdk::Url;
@@ -28,4 +28,10 @@ pub async fn action_list(since_published: Option<u64>, until_published: Option<u
     let args = Args::parse();
     let (keys, client) = init_nostr_client(args).await?;
     list_articles(since_published, until_published, client, keys.public_key()).await
+}
+
+pub async fn action_sync() -> Result<()> {
+    let args = Args::parse();
+    let (keys, client) = init_nostr_client(args).await?;
+    sync_articles(client, keys.public_key()).await
 }

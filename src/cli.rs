@@ -46,7 +46,7 @@ pub enum Commands {
         #[arg(short, long)]
         article_identifier: String,
     },
-    /// Force complete resynchronization.
+    /// Force complete resynchronization. Publish pending articles, delete marked for deletion, update eixting ones, and download not existing ones.
     Sync,
     /// List all articles published by the sec key owner.
     List {

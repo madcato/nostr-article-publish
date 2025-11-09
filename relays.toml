@@ -1,7 +1,5 @@
-[profile.default]
-private_key = "nsec1..."  # or set --key in CLI
 relays = [
-    "ws://micro-atx:18080",
+    "wss://nostr.veladan.dev",
     "wss://nos.lol",
     "wss://relay.damus.io",
     "wss://nostr.wine",
@@ -9,6 +7,10 @@ relays = [
     "wss://relay.nostr.band",
     "wss://purplepag.es"
 ]
+
+[profile.default]
+private_key = "nsec1..."  # or set --key in CLI
+
 
 [kind]
 article = 30023  # kind for long articles (NIP-23)

@@ -1,5 +1,7 @@
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::Write;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Relays {
@@ -11,13 +13,21 @@ pub struct PublishedEvent {
     pub event_id: String,
     pub published_at: String,
     pub kind: u16,
-    pub hash: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PublishedRegistry {
     #[serde(flatten)]
     pub articles: HashMap<String, PublishedEvent>,
+}
+
+impl PublishedRegistry {
+    pub fn save_to_path(&self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let serialized = serde_json::to_string_pretty(self)?;
+        let mut file = File::create(path)?;
+        file.write_all(serialized.as_bytes())?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

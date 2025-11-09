@@ -10,7 +10,7 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Args, Commands};
 use init::init_blog_structure;
-use actions::{action_publish, action_delete, action_list};
+use actions::{action_publish, action_delete, action_list, action_sync};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
         },
         Commands::Delete { article_identifier } => { action_delete(article_identifier).await? },
         Commands::List { since_published, until_published } => { action_list(since_published, until_published).await? },
-        Commands::Sync { } => {}  // TODO: Implement
+        Commands::Sync { } => { action_sync().await? },  
     }
 
     Ok(())
