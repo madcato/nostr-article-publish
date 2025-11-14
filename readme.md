@@ -33,7 +33,7 @@ A command-line tool written in Rust for publishing and deleting long-form conten
 
 Alternatively, install directly via Cargo if published to crates.io (adjust if applicable):
 ```
-cargo install nostr-publish
+cargo install --path .
 ```
 
 ## Configuration
@@ -46,6 +46,8 @@ repo-git/
 │   ├── other-post.md
 │   └── _deleted/
 │       └── removed.md
+│── images/
+│   └── header_article_1.png
 ├── nostr.toml          ← Global configuration
 └── .nostr/             ← Local metadata (cache, states)
     ├── published.json  ← Published events registry
