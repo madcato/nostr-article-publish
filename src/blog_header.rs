@@ -1,11 +1,38 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Deserializer, Serializer};
 use std::fs;
 use std::path::Path;
 use chrono::NaiveDate;
 
+// Custom serialization/deserialization for NaiveDate
+fn serialize_date<S>(date: &Option<NaiveDate>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match date {
+        Some(d) => serializer.serialize_str(&d.format("%Y-%m-%d").to_string()),
+        None => serializer.serialize_none(),
+    }
+}
+
+fn deserialize_date<'de, D>(deserializer: D) -> Result<Option<NaiveDate>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let opt: Option<String> = Option::deserialize(deserializer)?;
+    match opt {
+        Some(s) => {
+            NaiveDate::parse_from_str(&s, "%Y-%m-%d")
+                .map(Some)
+                .map_err(serde::de::Error::custom)
+        }
+        None => Ok(None),
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BlogHeader {
     pub title: Option<String>,
+    #[serde(serialize_with = "serialize_date", deserialize_with = "deserialize_date")]
     pub published_at: Option<NaiveDate>,
     pub image: Option<String>,
     pub summary: Option<String>,
@@ -130,7 +157,7 @@ Some content here with **markdown** formatting.
         let file_path = dir.path().join("test_post.md");
 
         // Create a blog header
-        let mut header = BlogHeader {
+        let header = BlogHeader {
             title: Some("Test Post".to_string()),
             published_at: Some(NaiveDate::from_ymd_opt(2025, 1, 15).unwrap()),
             image: Some("./test-image.jpg".to_string()),

@@ -5,6 +5,7 @@ mod client;
 mod nostr_operations;
 mod init;
 mod actions;
+mod blog_header;
 
 use anyhow::Result;
 use clap::Parser;

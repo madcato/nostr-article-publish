@@ -1,5 +1,7 @@
 use crate::config::{PublishedEvent, PublishedRegistry};
 use crate::validation::validate_content;
+use crate::blog_header::BlogHeader;
+use chrono::{DateTime, NaiveDate};
 use anyhow::{Context, Result};
 use nostr_sdk::prelude::*;
 use std::collections::HashSet;
@@ -7,9 +9,7 @@ use std::fs;
 use std::time::{Duration, Instant};
 use tokio::select;
 use std::collections::HashMap;
-use std::fs::File;
 use std::path::Path;
-use std::io::Write;
 
 pub async fn publish_article(
     file_name: String, 
@@ -196,17 +196,31 @@ pub async fn sync_articles(client: Client, public_key: PublicKey) -> Result<()> 
     let mut published_events: HashMap<String, PublishedEvent> = HashMap::new();
 
     for article in articles {
-        // Assuming `event.id` is a unique identifier for the article
         let event = article.0;
-        let filename = format!("{}.md", event.id);
+        let slug = generate_slug_from_event(&event);
+        let filename = format!("{}.md", slug);
         let file_path = Path::new("./articles").join(filename.clone());
 
         // Create the directory if it doesn't exist
         fs::create_dir_all(file_path.parent().unwrap())?;
 
-        // Write the content of the event to a file
-        let mut file = File::create(&file_path)?;
-        file.write_all(event.content.as_bytes())?;
+        // Try to parse existing BlogHeader if content has frontmatter
+        let blog_header = if event.content.starts_with("---") {
+            // Content already has frontmatter, try to parse it
+            match parse_event_with_frontmatter(&event) {
+                Ok(header) => header,
+                Err(_) => create_blog_header_from_event(&event, &slug),
+            }
+        } else {
+            // No frontmatter, create new header from event data
+            create_blog_header_from_event(&event, &slug)
+        };
+
+        // Save the blog header to file
+        if let Err(e) = blog_header.save(&file_path) {
+            eprintln!("Failed to save article {}: {}", filename, e);
+            continue;
+        }
 
         let published_event = PublishedEvent {
             event_id: event.id.to_string(),
@@ -228,4 +242,101 @@ pub async fn sync_articles(client: Client, public_key: PublicKey) -> Result<()> 
     }
 
     Ok(())
+}
+
+fn generate_slug_from_event(event: &Event) -> String {
+    // Try to extract title from content for slug generation
+    let first_line = event.content.lines().next().unwrap_or("");
+    
+    if first_line.starts_with("# ") {
+        // Extract title from markdown header
+        let title = first_line.trim_start_matches("# ").trim();
+        slug_from_title(title)
+    } else {
+        // Fallback to event ID
+        event.id.to_string()[..8].to_string() // Use first 8 chars of event ID
+    }
+}
+
+fn slug_from_title(title: &str) -> String {
+    title
+        .to_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect::<String>()
+        .split('-')
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()
+        .join("-")
+}
+
+fn parse_event_with_frontmatter(event: &Event) -> Result<BlogHeader, Box<dyn std::error::Error>> {
+    // Create temporary file to use BlogHeader::new()
+    use tempfile::NamedTempFile;
+    use std::io::Write;
+    
+    let mut temp_file = NamedTempFile::new()?;
+    temp_file.write_all(event.content.as_bytes())?;
+    
+    let mut header = BlogHeader::new(temp_file.path())?;
+    
+    // Update with event metadata if not present
+    if header.published_at.is_none() {
+        header.published_at = convert_timestamp_to_date(event.created_at);
+    }
+    
+    Ok(header)
+}
+
+fn create_blog_header_from_event(event: &Event, slug: &str) -> BlogHeader {
+    let content = event.content.clone();
+    
+    // Try to extract title from first line
+    let title = extract_title_from_content(&content);
+    
+    // Convert timestamp to date
+    let published_at = convert_timestamp_to_date(event.created_at);
+    
+    BlogHeader {
+        title,
+        published_at,
+        image: None,
+        summary: generate_summary(&content),
+        slug: slug.to_string(),
+        content,
+    }
+}
+
+fn extract_title_from_content(content: &str) -> Option<String> {
+    let first_line = content.lines().next().unwrap_or("").trim();
+    
+    if first_line.starts_with("# ") {
+        Some(first_line.trim_start_matches("# ").trim().to_string())
+    } else {
+        None
+    }
+}
+
+fn generate_summary(content: &str) -> Option<String> {
+    // Take first paragraph that's not a header as summary
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if !trimmed.is_empty() && !trimmed.starts_with('#') && trimmed.len() > 20 {
+            // Truncate to reasonable summary length
+            if trimmed.len() > 150 {
+                return Some(format!("{}...", &trimmed[..147]));
+            } else {
+                return Some(trimmed.to_string());
+            }
+        }
+    }
+    None
+}
+
+fn convert_timestamp_to_date(timestamp: Timestamp) -> Option<NaiveDate> {
+    // Assuming timestamp is Unix timestamp
+    match DateTime::from_timestamp(timestamp.as_secs() as i64, 0) {
+        Some(datetime) => Some(datetime.naive_utc().date()),
+        None => None,
+    }
 }

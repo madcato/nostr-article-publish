@@ -8,19 +8,20 @@ repository = "https://github.com/madcato/nostr-article-publish"
 anyhow = "1.0.100"
 clap = { version = "4.5.51", features = ["derive"] }
 derive = "1.0.0"
-nostr-sdk = "0.44.0"
+nostr-sdk = "0.44.1"
 regex = "1.12.2"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9.33"
 tokio = "1.48.0"
 toml = "0.9.8"
-config = "0.15.18"
+config = "0.15.19"
 pulldown-cmark = "0.13.0"
 gray_matter = "0.3.2"
 sha2 = "0.10.9"
 chrono = "0.4.42"
 git2 = "0.20.2"
+tempfile = "3.23.0"
 
 # The profile that 'dist' will build with
 [profile.dist]
