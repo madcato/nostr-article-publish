@@ -164,11 +164,11 @@ Not found events to delete.
 ### Article header
 ```markdown
 ---
-title: My fisrt post
-date: 2025-04-01
-tags: [rust, nostr]
-summary: A short summary
-slug: my-first-post
+title: My fisrt post            # Optional
+published_at: 2025-04-01        # Optional
+image: ./images/header-01.jpg   # Optional
+summary: A short summary        # Optional
+slug: my-first-post             # Required
 ---
 
 # Content...
