@@ -33,7 +33,7 @@ pub async fn init_blog_structure() -> Result<()> {
     create_dir_with_keep(".nostr/keys")?;
 
     // Create nostr.toml with default configuration
-    let nostr_toml_path = "nostr.toml";
+    let nostr_toml_path = "relays.toml";
     if !Path::new(nostr_toml_path).exists() {
         let default_config = Relays {
             relays: vec![

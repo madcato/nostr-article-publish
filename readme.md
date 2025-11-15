@@ -48,6 +48,7 @@ repo-git/
 │       └── removed.md
 │── images/
 │   └── header_article_1.png
+├── relays.toml         ← Nostr relays to publish
 ├── nostr.toml          ← Global configuration
 └── .nostr/             ← Local metadata (cache, states)
     ├── published.json  ← Published events registry
@@ -74,11 +75,11 @@ export NOSTR_SEC_KEY="nsec1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ## Usage
 
 ```bash
-nostr-publish publish        # Publish pending changes
-nostr-publish status         # Show what is published in local directory
-nostr-publish delete <file>  # Mark as deleted and publish delete event
-nostr-publish sync           # Force complete resynchronization
-nostr-publish init           # Initialize current directory
+nostr-publish publish -f <file_path> -a <article_id>  # Publish pending changes
+nostr-publish status                                  # Show what is published in local directory
+nostr-publish delete -a <article_id>                  # Mark as deleted and publish delete event
+nostr-publish sync                                    # Force complete resynchronization
+nostr-publish init                                    # Initialize current directory
 ```
 
 ### General Flags
