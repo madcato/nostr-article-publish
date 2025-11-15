@@ -32,7 +32,12 @@ where
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BlogHeader {
     pub title: Option<String>,
-    #[serde(serialize_with = "serialize_date", deserialize_with = "deserialize_date")]
+    #[serde(
+        serialize_with = "serialize_date", 
+        deserialize_with = "deserialize_date",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub published_at: Option<NaiveDate>,
     pub image: Option<String>,
     pub summary: Option<String>,

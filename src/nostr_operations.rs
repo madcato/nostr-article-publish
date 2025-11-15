@@ -297,14 +297,26 @@ fn create_blog_header_from_event(event: &Event, slug: &str) -> BlogHeader {
     // Convert timestamp to date
     let published_at = convert_timestamp_to_date(event.created_at);
     
+    // Extract summary from hashtag tag
+    let summary = event.tags.iter()
+        .find_map(|tag| {
+            tag.content();
+             if tag.kind() == TagKind::t() {
+                tag.content().map(|s| s.to_string())
+            } else {
+                None
+            }
+        });
+    
     BlogHeader {
         title,
         published_at,
         image: None,
-        summary: generate_summary(&content),
+        summary,
         slug: slug.to_string(),
         content,
     }
+
 }
 
 fn extract_title_from_content(content: &str) -> Option<String> {
@@ -317,16 +329,16 @@ fn extract_title_from_content(content: &str) -> Option<String> {
     }
 }
 
-fn generate_summary(content: &str) -> Option<String> {
+fn generate_summary(content: &str) -> Option<&str> {
     // Take first paragraph that's not a header as summary
     for line in content.lines() {
         let trimmed = line.trim();
         if !trimmed.is_empty() && !trimmed.starts_with('#') && trimmed.len() > 20 {
             // Truncate to reasonable summary length
             if trimmed.len() > 150 {
-                return Some(format!("{}...", &trimmed[..147]));
+                return Some(&trimmed[..147]);
             } else {
-                return Some(trimmed.to_string());
+                return Some(trimmed);
             }
         }
     }
