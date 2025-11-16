@@ -1,9 +1,15 @@
 use crate::cli::Args;
 use crate::client::init_nostr_client;
-use crate::nostr_operations::{publish_article, delete_article, list_articles, sync_articles};
+use crate::commands::*;
 use anyhow::Result;
 use clap::Parser;
 use nostr_sdk::Url;
+
+
+pub async fn action_init() -> Result<()> {
+    let current_dir = std::env::current_dir()?;
+    init_blog_structure_in_dir(current_dir).await
+}
 
 pub async fn action_publish(
     file_name: String, 
