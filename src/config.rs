@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Write, Read};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Relays {
@@ -28,6 +28,20 @@ impl PublishedRegistry {
         file.write_all(serialized.as_bytes())?;
         Ok(())
     }
+
+    pub fn load_from_path(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+        let mut file = File::open(path)?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+        let registry = serde_json::from_str(&contents)?;
+        Ok(registry)
+    }
+
+    // pub fn new() -> Self {
+    //     PublishedRegistry {
+    //         articles: HashMap::new(),
+    //     }
+    // }
 }
 
 #[cfg(test)]
