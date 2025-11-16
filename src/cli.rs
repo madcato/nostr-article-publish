@@ -17,8 +17,6 @@ pub struct Args {
 pub enum Commands {
     /// Create base blog files structure.
     Init,
-    /// Show what is published.
-    Status,
     /// Publish an new long-form content event on configured nostr relays.
     Publish {
         /// File name of the content to publish.

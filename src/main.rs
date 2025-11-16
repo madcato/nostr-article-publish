@@ -18,7 +18,6 @@ async fn main() -> Result<()> {
     let args = Args::parse();
     match args.command {
         Commands::Init { } => { init_blog_structure().await? },
-        Commands::Status { } => { },  // TODO: Implement
         Commands::Publish { file_name, article_identifier, title, image, summary, published_at } => { 
             action_publish(file_name, article_identifier, title, image, summary, published_at).await? 
         },
