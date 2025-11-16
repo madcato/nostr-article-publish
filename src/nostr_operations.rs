@@ -59,7 +59,7 @@ pub async fn publish_article(
 }
 
 pub async fn delete_article(article_identifier: String, client: Client, public_key: PublicKey) -> Result<()> {
-    let coordinate = Coordinate { kind: Kind::LongFormTextNote, public_key: public_key, identifier: article_identifier };
+    let coordinate = Coordinate { kind: Kind::LongFormTextNote, public_key: public_key, identifier: article_identifier.clone() };
 
     // Create subscription to find the article to delete
     let subscription = Filter::new()
@@ -123,6 +123,10 @@ pub async fn delete_article(article_identifier: String, client: Client, public_k
     }
     let event = client.send_event_builder(builder).await?;
     println!("Deletion EventId: {}", event.to_hex());
+
+    // Move the file from ./articles to ./articles/_deleted
+    move_deleted_article_file(&article_identifier)?;
+    
     Ok(())
 }
 
@@ -415,5 +419,69 @@ fn save_to_published_registry(file_name: &str, article_identifier: &str, event: 
     }
 
     println!("Article saved to published registry: {}", registry_path);
+    Ok(())
+}
+
+fn move_deleted_article_file(article_identifier: &str) -> Result<()> {
+    // Create the filename with .md extension
+    let filename = format!("{}.md", article_identifier);
+    let source_path = Path::new("./articles").join(&filename);
+    
+    // Check if the file exists in the articles directory
+    if !source_path.exists() {
+        println!("Article file not found: {}", source_path.display());
+        // Still try to remove from registry even if file doesn't exist
+        remove_from_published_registry(&filename)?;
+        return Ok(());
+    }
+    
+    // Create the _deleted directory if it doesn't exist
+    let deleted_dir = Path::new("./articles/_deleted");
+    fs::create_dir_all(deleted_dir)
+        .with_context(|| format!("Failed to create directory: {}", deleted_dir.display()))?;
+    
+    // Move the file to the _deleted directory
+    let destination_path = deleted_dir.join(&filename);
+    fs::rename(&source_path, &destination_path)
+        .with_context(|| format!("Failed to move file from {} to {}", source_path.display(), destination_path.display()))?;
+    
+    println!("Moved deleted article from {} to {}", source_path.display(), destination_path.display());
+    
+    // Remove the entry from the published registry
+    remove_from_published_registry(&filename)?;
+    
+    Ok(())
+}
+
+fn remove_from_published_registry(filename: &str) -> Result<()> {
+    // Ensure .nostr directory exists
+    fs::create_dir_all(".nostr")?;
+    
+    let registry_path = ".nostr/published.json";
+    
+    // Load existing registry
+    let mut registry = match PublishedRegistry::load_from_path(registry_path) {
+        Ok(registry) => registry,
+        Err(_) => {
+            println!("Published registry not found or invalid: {}", registry_path);
+            return Ok(());
+        }
+    };
+    
+    // Remove the article from the registry
+    match registry.articles.remove(filename) {
+        Some(_) => {
+            // Save the updated registry
+            if let Err(e) = registry.save_to_path(registry_path) {
+                println!("Failed to save updated registry: {}", e);
+            } else {
+                println!("Removed article '{}' from published registry", filename);
+            }
+        }
+        None => {
+            println!("Article '{}' not found in published registry", filename);
+        }
+    }
+    
     Ok(())
 }
