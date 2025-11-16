@@ -285,6 +285,11 @@ fn parse_event_with_frontmatter(event: &Event) -> Result<BlogHeader, Box<dyn std
         header.published_at = convert_timestamp_to_date(event.created_at);
     }
     
+    // Extract image URL from event tags if not already present
+    if header.image.is_none() {
+        header.image = extract_image_url_from_event(event);
+    }
+    
     Ok(header)
 }
 
@@ -308,10 +313,13 @@ fn create_blog_header_from_event(event: &Event, slug: &str) -> BlogHeader {
             }
         });
     
+    // Extract image URL from event tags
+    let image = extract_image_url_from_event(event);
+    
     BlogHeader {
         title,
         published_at,
-        image: None,
+        image,
         summary,
         slug: slug.to_string(),
         content,
@@ -329,21 +337,21 @@ fn extract_title_from_content(content: &str) -> Option<String> {
     }
 }
 
-fn generate_summary(content: &str) -> Option<&str> {
-    // Take first paragraph that's not a header as summary
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if !trimmed.is_empty() && !trimmed.starts_with('#') && trimmed.len() > 20 {
-            // Truncate to reasonable summary length
-            if trimmed.len() > 150 {
-                return Some(&trimmed[..147]);
-            } else {
-                return Some(trimmed);
-            }
-        }
-    }
-    None
-}
+// fn generate_summary(content: &str) -> Option<&str> {
+//     // Take first paragraph that's not a header as summary
+//     for line in content.lines() {
+//         let trimmed = line.trim();
+//         if !trimmed.is_empty() && !trimmed.starts_with('#') && trimmed.len() > 20 {
+//             // Truncate to reasonable summary length
+//             if trimmed.len() > 150 {
+//                 return Some(&trimmed[..147]);
+//             } else {
+//                 return Some(trimmed);
+//             }
+//         }
+//     }
+//     None
+// }
 
 fn convert_timestamp_to_date(timestamp: Timestamp) -> Option<NaiveDate> {
     // Assuming timestamp is Unix timestamp
@@ -351,4 +359,17 @@ fn convert_timestamp_to_date(timestamp: Timestamp) -> Option<NaiveDate> {
         Some(datetime) => Some(datetime.naive_utc().date()),
         None => None,
     }
+}
+
+fn extract_image_url_from_event(event: &Event) -> Option<String> {
+    // Look for image tags in the event
+    event.tags.iter()
+        .find_map(|tag| {
+            if tag.kind() == TagKind::Image {
+                // Try to extract URL from imeta or image tag content
+                tag.content().map(|s| s.to_string())
+            } else {
+                None
+            }
+        })
 }

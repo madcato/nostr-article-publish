@@ -75,10 +75,12 @@ export NOSTR_SEC_KEY="nsec1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ## Usage
 
 ```bash
-nostr-publish publish -f <file_path> -a <article_id>  # Publish pending changes
+nostr-publish publish                                 # Publish pending changes
+nostr-publish publish -f <file_path> -a <article_id>  # Publish a concrete article
 nostr-publish status                                  # Show what is published in local directory
 nostr-publish delete -a <article_id>                  # Mark as deleted and publish delete event
-nostr-publish sync                                    # Force complete resynchronization
+nostr-publish update -f <file_path> -a <article_id>   # Remove published articlefrom Nostr, and republished it
+nostr-publish sync                                    # Discover and download articles already published.
 nostr-publish init                                    # Initialize current directory
 ```
 
