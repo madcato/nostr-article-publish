@@ -1,5 +1,5 @@
 use crate::config::{PublishedEvent, PublishedRegistry};
-use crate::validation::validate_content;
+use crate::validation::ContentValidator;
 use anyhow::{Context, Result};
 use nostr_sdk::prelude::*;
 use std::collections::HashMap;
@@ -17,7 +17,7 @@ pub async fn publish_article(
     public_key: PublicKey
 ) -> Result<()> {
     let content = fs::read_to_string(&file_name).with_context(|| format!("Content file could not be read."))?;
-    validate_content(&content)?;
+    ContentValidator::validate_content(&content)?;
     
     let mut tags = Vec::from([
         Tag::identifier(article_identifier.clone()),
